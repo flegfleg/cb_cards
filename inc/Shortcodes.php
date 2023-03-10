@@ -3,100 +3,56 @@
 * Aktuelle Shortcodes:
 * [cb_postgrid itemcat,locationcat,hidedefault=False]
 *
-* [cb_itemgallery itemcat,locationcat,hideDefault=True]
-*
 */
 
 
 function shortcode_postGridfromCategory($atts){
+	
 	require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/postGrid.php');
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
-	  'locationcat' => '',
+	    'locationcat' => '',
 		'class' => '',
-		'hidedefault' => 'false',
-    	'sortbyavailability' => 'true',
-		'kupplung' => '',
-		'mobile' => 'true' //If the element should be shown on mobile
+		'hidedefault' => TRUE,
+    	'sortbyavailability' => TRUE,
+		'include_filter' => 'true' // Show the filter Nav HTML
 	),$atts);
+	
+	$atts['itemcat'] = filter_var( $atts['itemcat'], FILTER_VALIDATE_INT );
+	
+	// allow setting itemcat by url 
+	$itemcat = get_query_var( 'itemcat', $atts['itemcat'] );	
+	
+	$atts['include_filter'] = filter_var( $atts['include_filter'], FILTER_VALIDATE_BOOLEAN );
+	if ($atts['include_filter']) {
+		renderFilterNav();
+	}
+	
 	$atts['hidedefault'] = filter_var( $atts['hidedefault'], FILTER_VALIDATE_BOOLEAN );
-  $atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
-  $atts['mobile'] = filter_var($atts['mobile'], FILTER_VALIDATE_BOOLEAN );
-  if (wp_is_mobile() && !$atts['mobile']){
-	  return ""; // does not execute when site is on mobile and mobile is disabled
-  }
+	$atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
 
-	/* Mies dreckiger Workaround bis es die Funktion filterPostsByKupplung gibt*/
-	if ($atts['kupplung'] != '') {
-		$itemList = get_post_by_category_and_kupplung($atts['itemcat'],array($atts['kupplung']));
-	}
-	else {
-		$itemList = get_cb_items_by_category($atts['itemcat']);
-	}
+  $itemList = get_cb_items_by_category($itemcat);
+
   if ($atts['locationcat'] != '') {
     $itemList = filterPostsByLocation($itemList,$atts['locationcat']);
   }
   $itemAvailabilities = itemListAvailabilities($itemList);
+  
   if ($atts['sortbyavailability']){
     $itemList = sortItemsByAvailability($itemList,$itemAvailabilities);
   }
-
 
 	if ($itemList){
 		return create_postgrid_from_posts($itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class']);
 	}
 	else {
-		return "no posts found";
+		return __('no posts found', 'cb_cards');
 	}
 }
 
 add_shortcode( 'cb_postgrid', 'shortcode_postGridfromCategory' );
 
-$galleryIterator = 0;
 
-function shortcode_itemGalleryfromCategory($atts){
-	require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/itemGallery.php');
-	global $galleryIterator;
-	$atts = shortcode_atts( array(
-		'itemcat' => '',
-	  'locationcat' => '',
-		'class' => '',
-		'hidedefault' => 'true',
-    'sortbyavailability' => 'true',
-	'mobile' => 'true' //If the element should be shown on mobile
-	),$atts);
-	$atts['hidedefault'] = filter_var( $atts['hidedefault'], FILTER_VALIDATE_BOOLEAN );
-  $atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
-  $atts['mobile'] = filter_var($atts['mobile'], FILTER_VALIDATE_BOOLEAN );
-  if (wp_is_mobile() && !$atts['mobile']){
-	  return ""; // does not execute when site is on mobile and mobile is disabled
-  }
-	$itemList = get_cb_items_by_category($atts['itemcat']);
-
-  if ($atts['locationcat'] != '') {
-    $itemList = filterPostsByLocation($itemList,$atts['locationcat']);
-  }
-  $itemAvailabilities = itemListAvailabilities($itemList);
-  if ($atts['sortbyavailability']){
-    $itemList = sortItemsByAvailability($itemList,$itemAvailabilities);
-  }
-
-	if ($itemList){
-		$gallery_html = cb_itemGallery($itemList,$itemAvailabilities,$galleryIterator,$atts['hidedefault'],$atts['class']);
-		$galleryIterator = $galleryIterator + 1;
-		?>
-		<script>
-		var galleryIterator = <?php echo json_encode($galleryIterator); ?>;
-		</script>
-		<?php
-		return $gallery_html;
-	}
-	else {
-		return "no posts found";
-	}
-}
-
-add_shortcode( 'cb_itemgallery', 'shortcode_itemGalleryfromCategory' );
 
 function shortcode_locationCats($atts){
 	$atts = shortcode_atts( array(
@@ -133,5 +89,44 @@ function shortcode_locationCats($atts){
 add_shortcode( 'cb_locationcats', 'shortcode_locationCats' );
 
 
+function renderFilterNav( ) {
+	
+	$include_empty = TRUE;
+	$hide_unavailable_items = FALSE;
+	$hide_empty_cats = TRUE;
+	$taxonomy = 'cb_items_category';
+	$css_class = '';
+	
+	// Get the taxonomy's terms
+	$terms = get_terms(
+		array(
+			'taxonomy'   => $taxonomy,
+		)
+	);
 
- ?>
+	if ( ! empty( $terms ) && is_array( $terms ) ) { ?>
+		
+		<ul class="<?php echo $css_class; ?> nav-ul builder-item--primary-menu">
+				<li class="term-all"><a href="<?php echo esc_url( add_query_arg( 'itemcat','' ) ) ?>" >
+				<?php echo __(
+					'All', 'cb_cards'
+				); ?>
+			</a></li>
+		<?php foreach ( $terms as $term ) {			
+			$args = array(
+				'orderby'			=> 'title',
+				'order'				=> 'ASC',
+				'category_slug' => $term->slug,
+			);
+			$items = \CommonsBooking\Repository\Item::get($args, $hide_unavailable_items);
+			$count = count($items);
+		    ?>
+				<li class="menu-item term-<?php echo $term->slug; ?>"><a href="<?php echo esc_url( add_query_arg( 'itemcat', $term->slug ) ) ?>" >
+					<?php echo $term->name; ?>
+				(<?php echo $count; ?>)</a></li><?php
+			} ?>
+		</ul>
+	<?php 
+	} // end if  ! empty( $terms ) && is_array( $terms )
+} // end func
+?>

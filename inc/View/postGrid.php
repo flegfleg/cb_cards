@@ -26,7 +26,7 @@ function enqueue_postgrid_styles(){
 */
 
 function create_postgrid_from_posts($items,$itemAvailabilities,$hideCardMeta=True,$css_class='') {
-  require_once(get_stylesheet_directory() . '/inc/View/itemAvailability.php'); //Um Kartenmeta zu rendern
+  require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/itemAvailability.php'); //Um Kartenmeta zu rendern
 	$cardMeta_class = 'card__meta card__meta--last';
 	if ($hideCardMeta){
 		$cardMeta_class = 'card__meta card__meta--last card__hidden';

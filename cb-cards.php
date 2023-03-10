@@ -30,3 +30,10 @@ define( 'CB_CARDS_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 
 require_once ( CB_CARDS_PLUGIN_PATH . 'inc/QueryFunctions.php');
 require_once (CB_CARDS_PLUGIN_PATH . 'inc/Shortcodes.php'); 
+
+// Add a query var for filtering posts
+function add_query_vars_filter( $vars ){
+  $vars[] = "itemcat";
+  return $vars;
+}
+add_filter( 'query_vars', 'add_query_vars_filter' );
