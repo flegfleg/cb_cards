@@ -9,13 +9,13 @@
 
 
 function shortcode_postGridfromCategory($atts){
-	require_once(get_stylesheet_directory() . '/inc/View/postGrid.php');
+	require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/postGrid.php');
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
 	  'locationcat' => '',
 		'class' => '',
 		'hidedefault' => 'false',
-    'sortbyavailability' => 'true',
+    	'sortbyavailability' => 'true',
 		'kupplung' => '',
 		'mobile' => 'true' //If the element should be shown on mobile
 	),$atts);
@@ -55,7 +55,7 @@ add_shortcode( 'cb_postgrid', 'shortcode_postGridfromCategory' );
 $galleryIterator = 0;
 
 function shortcode_itemGalleryfromCategory($atts){
-	require_once(get_stylesheet_directory() . '/inc/View/itemGallery.php');
+	require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/itemGallery.php');
 	global $galleryIterator;
 	$atts = shortcode_atts( array(
 		'itemcat' => '',

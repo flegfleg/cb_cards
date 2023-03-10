@@ -27,7 +27,7 @@ function enqueue_itemGallery_styles(){
  */
 
 function cb_itemGallery($items,$item_availabilites,$galleryNo=0,$hideCardMeta=True,$css_class=''){
-  require_once(get_stylesheet_directory() . '/inc/View/itemAvailability.php');
+  require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/itemAvailability.php');
 	enqueue_itemGallery_styles();
 	$class = 'gallery' . $galleryNo;
 	$cardMeta_class = 'card__meta card__meta--last';
