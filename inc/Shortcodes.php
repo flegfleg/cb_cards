@@ -1,7 +1,7 @@
 <?php
 /*
 * Aktuelle Shortcodes:
-* [cb_postgrid itemcat,locationcat,hidedefault=False]
+* [cb_catalogue]
 *
 */
 
