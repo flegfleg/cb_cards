@@ -1,0 +1,36 @@
+.cb-wrapper ul.filterbar {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cb-wrapper ul.filterbar li {
+	margin: 0 20px 0 0;
+	padding: 0;
+	float: left;
+}
+
+.cb-wrapper ul.filterbar li a{
+	margin: 0;
+	padding: 0;
+	text-decoration: none;
+}
+
+.cb-wrapper ul.filterbar li.current-term a{
+	font-weight: bolder;
+}
+
+ul.card__meta, ul.card__meta li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+ ul.card__meta li.address {
+	 display: none;
+ } 
+ 
+ ul.card__meta li.availability .cb-postgrid-item-availability {
+	flex-wrap: nowrap;
+	align-content: stretch;
+ }

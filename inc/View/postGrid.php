@@ -1,9 +1,11 @@
 <?php
 
 function enqueue_postgrid_styles(){
-	wp_register_style('postgrid-css', get_stylesheet_directory_uri() . '/inc/View/css/postgrid.css', __FILE__);
-	wp_enqueue_style('postgrid-css');
-	wp_enqueue_script('postgrid-js', get_stylesheet_directory_uri() . '/inc/View/js/postGrid.js', array('jquery','imagesloaded','masonry'));
+	wp_register_style('postgrid-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/postgrid.css', __FILE__);
+	wp_enqueue_style('postgrid-css');	
+	wp_register_style('filterbar-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/filterbar.css', __FILE__);
+	wp_enqueue_style('filterbar-css');	
+	wp_enqueue_script('postgrid-js', CB_CATALOGUE_PLUGIN_URI . '/inc/View/js/postGrid.js', array('jquery','imagesloaded','masonry'));
 }
 
 /*-------------------------------------------------------------------------------
@@ -26,7 +28,7 @@ function enqueue_postgrid_styles(){
 */
 
 function create_postgrid_from_posts($items,$itemAvailabilities,$hideCardMeta=True,$css_class='') {
-  require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/itemAvailability.php'); //Um Kartenmeta zu rendern
+  require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/itemAvailability.php'); //Um Kartenmeta zu rendern
 	$cardMeta_class = 'card__meta card__meta--last';
 	if ($hideCardMeta){
 		$cardMeta_class = 'card__meta card__meta--last card__hidden';
@@ -39,19 +41,19 @@ function create_postgrid_from_posts($items,$itemAvailabilities,$hideCardMeta=Tru
 				$itemAvailability = $itemAvailabilities[$itemID];
 				$item_title = $item->post_title;
 				$item_permalink = get_permalink($itemID);
-				$itemThumbnailURL = get_the_post_thumbnail_url($itemID,'medium');
+				$itemThumbnailURL = cb_catalogue_get_the_post_thumbnail_url($itemID);
 				$itemLocAddress = cb_item_locAdress($itemID);
 
 				$print .= '<div class="grid '.$css_class.'">';
 					$print .= '<div class="card" id="'.$itemID.'">';
 						$print .= '<div class="card__image">';
 							$print .= '<img src="'.esc_url($itemThumbnailURL).'" alt="'.$item_title.'">';
-							$print .= '<div class="card__overlay card__overlay--blue">';
+							$print .= '<div class="card__overlay card__overlay--white">';
 								$print .= '<div class="card__overlay-content">';
 									$print .= '<a href="'.$item_permalink.'" class="card__title">'.$item_title.'</a>';
 									$print .= '<ul class="'.$cardMeta_class.'">';
-										$print .= '<li><a href="'.$item_permalink.'"><i class="fas fa-map-marker"></i>'.$itemLocAddress.'</a></li>';
-										$print .= '<li>' . render_item_availability($itemAvailability) . '</li>';
+										$print .= '<li class="address"><a href="'.$item_permalink.'"><i class="fas fa-map-marker"></i>'.$itemLocAddress.'</a></li>';
+										$print .= '<li class="availability">' . render_item_availability($itemAvailability) . '</li>';
 									$print .= '</ul>';
 								$print .= '</div><!-- end:card__overlay-content -->';
 							$print .= '</div><!-- end:card__image -->';

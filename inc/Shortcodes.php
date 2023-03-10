@@ -5,10 +5,10 @@
 *
 */
 
-
-function shortcode_postGridfromCategory($atts){
+function shortcode_cb_catalogue($atts){
 	
-	require_once(CB_CARDS_PLUGIN_PATH . '/inc/View/postGrid.php');
+	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/postGrid.php');
+	
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
 	    'locationcat' => '',
@@ -25,13 +25,15 @@ function shortcode_postGridfromCategory($atts){
 	
 	$atts['include_filter'] = filter_var( $atts['include_filter'], FILTER_VALIDATE_BOOLEAN );
 	if ($atts['include_filter']) {
-		renderFilterNav();
+		
 	}
 	
+	$itemList = filterNavBar( 'cb_items_category', $itemcat );
+
 	$atts['hidedefault'] = filter_var( $atts['hidedefault'], FILTER_VALIDATE_BOOLEAN );
 	$atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
 
-  $itemList = get_cb_items_by_category($itemcat);
+  // $itemList = get_cb_items_by_category($itemcat, FALSE);
 
   if ($atts['locationcat'] != '') {
     $itemList = filterPostsByLocation($itemList,$atts['locationcat']);
@@ -46,87 +48,68 @@ function shortcode_postGridfromCategory($atts){
 		return create_postgrid_from_posts($itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class']);
 	}
 	else {
-		return __('no posts found', 'cb_cards');
+		return '<div class="cb-notice cb-error">' . __('No posts found', 'cb_cards') . '</div>';
 	}
 }
 
-add_shortcode( 'cb_postgrid', 'shortcode_postGridfromCategory' );
+add_shortcode( 'cb_catalogue', 'shortcode_cb_catalogue' );
 
 
-
-function shortcode_locationCats($atts){
-	$atts = shortcode_atts( array(
-		'itemcat' => '',
-	),$atts);
-	$html = '';
-	$itemcat_url = '';
-	$itemTerms = get_terms(array('taxonomy' => 'cb_locations_category'));
-	if ($atts['itemcat'] != ''){
-		$itemterm = get_term_by('slug',$atts['itemcat'],'cb_items_category');
-		$itemterm_id = $itemterm -> term_id;
-		$itemcat_url = '?itemcat=' . $itemterm_id;
-
-		foreach ($itemTerms as $key => $term){
-			$itemsForTerm = get_cb_items_by_category($atts['itemcat']); //nimmt alle buchbaren Items der entsprechenden Kategorie
-			$itemsForTerm = filterPostsByLocation($itemsForTerm,$term->slug); //entfernt alle Items, die nicht in der Location sind
-
-			if (!$itemsForTerm) { //entfernt alle Terms die nicht items der entsprechenden Kategorie haben
-				unset($itemTerms[$key]);
-			}
-
-		}
-	}
-
-	foreach ($itemTerms as $key => $term) {
-		$html .= '<a href="'.esc_url( get_term_link( $term ) . $itemcat_url ).'">' . $term->name . '</a>';
-		if ($key != array_key_last($itemTerms)) {
-			$html .= ', '; //adds seperator when not last item
-		}
-	}
-	return $html;
-}
-
-add_shortcode( 'cb_locationcats', 'shortcode_locationCats' );
-
-
-function renderFilterNav( ) {
+function filterNavBar( $taxonomy = 'cb_items_category', $current_term = '' ) {
 	
 	$include_empty = TRUE;
 	$hide_unavailable_items = FALSE;
 	$hide_empty_cats = TRUE;
-	$taxonomy = 'cb_items_category';
 	$css_class = '';
+	$current_term_items = array();
 	
 	// Get the taxonomy's terms
-	$terms = get_terms(
+	$nav_terms = get_terms(
 		array(
 			'taxonomy'   => $taxonomy,
 		)
 	);
-
-	if ( ! empty( $terms ) && is_array( $terms ) ) { ?>
+	
+	// add a dummy entry for "all/no-filter"
+	$nav_no_filter = array(
+		'name' => __('All', 'cb_cards'),
+		'slug' => '' 
+		);
 		
-		<ul class="<?php echo $css_class; ?> nav-ul builder-item--primary-menu">
-				<li class="term-all"><a href="<?php echo esc_url( add_query_arg( 'itemcat','' ) ) ?>" >
-				<?php echo __(
-					'All', 'cb_cards'
-				); ?>
-			</a></li>
-		<?php foreach ( $terms as $term ) {			
+	$nav_obj = (object) $nav_no_filter;
+	array_unshift($nav_terms,  $nav_obj);
+		
+	if ( ! empty( $nav_terms ) && is_array( $nav_terms ) ) { 
+		$term_items = array();
+		?>
+
+		<div class="cb-wrapper">
+			<ul class="<?php echo $css_class; ?> filterbar">
+		<?php foreach ( $nav_terms as $term ) {			
 			$args = array(
 				'orderby'			=> 'title',
 				'order'				=> 'ASC',
 				'category_slug' => $term->slug,
 			);
-			$items = \CommonsBooking\Repository\Item::get($args, $hide_unavailable_items);
-			$count = count($items);
+			$term_items = \CommonsBooking\Repository\Item::get($args, $hide_unavailable_items);
+			$count = count($term_items);
+
+			$is_current = '';
+			
+			if ( $term->slug == $current_term ) {
+				$current_term_items = $term_items;
+				$is_current = 'current-term';
+			}
+			
 		    ?>
-				<li class="menu-item term-<?php echo $term->slug; ?>"><a href="<?php echo esc_url( add_query_arg( 'itemcat', $term->slug ) ) ?>" >
+				<li class="term-<?php echo $term->slug; ?> <?php echo $is_current; ?>"><a href="<?php echo esc_url( add_query_arg( 'itemcat', $term->slug ) ) ?>" >
 					<?php echo $term->name; ?>
-				(<?php echo $count; ?>)</a></li><?php
+				</a>(<?php echo $count; ?>)</li><?php
 			} ?>
 		</ul>
+		</div>
 	<?php 
+	return $current_term_items;
 	} // end if  ! empty( $terms ) && is_array( $terms )
-} // end func
+}
 ?>
