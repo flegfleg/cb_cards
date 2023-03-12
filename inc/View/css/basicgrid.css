@@ -1,0 +1,110 @@
+.grid__wrapper {
+ display: flex;
+ flex-wrap: wrap;
+} 
+
+div.grid__wrapper div.grid {
+  display: flex;
+  padding: 1rem;
+}
+
+/* Small only */
+@media screen and (max-width: 39.9375em) {
+  div.grid__wrapper div.grid  {
+    width: 100%;
+  }
+}
+
+/* Medium and up */
+@media screen and (min-width: 40em) {
+  div.grid__wrapper div.grid  {
+    width: 50%;
+  }
+}
+
+/* Medium only */
+@media screen and (min-width: 63.9375em) {
+  div.grid__wrapper div.grid  {
+    width: 33%;
+  }
+}
+
+
+div.grid__wrapper .grid .card {
+  background-size: cover;
+  padding: 1rem;
+  width: 100%;
+  min-height: 300px;
+  border-radius: var(--commonsbooking-radius);
+}
+
+ul.card__meta {
+  margin: 0;
+  padding: 0;
+}
+
+div.grid__wrapper .grid .card a {
+  color: #FFF;
+  display: block;
+  font-weight: bolder;
+  line-height: 1em;
+  text-shadow: 0px 0px 5px #000;
+}
+
+.card__overlay {
+  height: 100%;
+  display: flex; 
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.cb-postgrid-item-availability {
+  display: flex;
+  align-content: stretch;
+  gap: 5px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cb-postgrid-item-availability-day {
+  width: 14%;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  border-radius: var(--commonsbooking-radius);
+  background-clip: padding-box;
+}
+
+.cb-postgrid-item-availability-day.available {
+  background-color: #79b50d;
+}
+
+.cb-postgrid-item-availability-day.location-closed {
+  background-color: #ddd;
+  color: #222222a1;
+}
+
+.cb-postgrid-item-availability-day.no-timeframe {
+  background-color: #ddd;
+  color: #222222a1;
+}
+
+.cb-postgrid-item-availability-day.booked {
+  color: #444;
+  background: linear-gradient(to top left, #ee7400 0%, #ee7400 calc(50% - 1px), #333 50%, #ee7400 calc(50% + 1px), #ee7400 100%);
+}
+
+.cb-postgrid-item-availability-day.partially-booked {
+  color: #444;
+  background: linear-gradient(to top left, #7fc600 0%, #7fc600 calc(50% - 1px), #333 50%, #ee7400 calc(50% + 1px), #ee7400 100%);
+}
+
+/* dirty hack coming up:*/
+.cb-postgrid-availability-days {
+  height: 20px;
+}
+
+.cb-postgrid-availability-month {
+  height: 30px;
+}

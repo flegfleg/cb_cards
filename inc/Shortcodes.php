@@ -7,9 +7,6 @@
 
 function shortcode_cb_catalogue($atts){
 	
-	wp_register_style('filterbar-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/filterbar.css', __FILE__);
-	wp_enqueue_style('filterbar-css');	
-	
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
 		'class' => '',
@@ -34,7 +31,7 @@ function shortcode_cb_catalogue($atts){
   	}
 	
 	if ($itemList){	
-		cb_catalogue_render_masonry_grid( $itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class'] );
+		cb_catalogue_render_basic_grid( $itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class'] );
 	}
 	else {
 		return '<div class="cb-notice cb-error">' . __('No posts found', 'cb_cards') . '</div>';
@@ -54,9 +51,9 @@ function cb_catalogue_get_current_term( $default ) {
 	echo create_postgrid_from_posts($itemList,$itemAvailabilities,$hidedefault,$class);
  } 
  
- function cb_catalogue_render_grid( $itemList,$itemAvailabilities,$hidedefault,$class ) {
-	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/standardGrid.php');
-	echo create_grid_from_posts($itemList,$itemAvailabilities,$hidedefault,$class);
+ function cb_catalogue_render_basic_grid( $itemList,$itemAvailabilities,$hidedefault,$class ) {
+	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/basicGrid.php');
+	echo create_basic_grid_from_posts($itemList,$itemAvailabilities,$hidedefault,$class);
  }
  
 
