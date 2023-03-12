@@ -7,45 +7,34 @@
 
 function shortcode_cb_catalogue($atts){
 	
-	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/postGrid.php');
+	wp_register_style('filterbar-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/filterbar.css', __FILE__);
+	wp_enqueue_style('filterbar-css');	
 	
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
-	    'locationcat' => '',
 		'class' => '',
 		'hidedefault' => TRUE,
-    	'sortbyavailability' => TRUE,
-		'include_filter' => 'true' // Show the filter Nav HTML
+		'layout' => 'masonry',
+    	'sortbyavailability' => TRUE
 	),$atts);
 	
 	$atts['itemcat'] = filter_var( $atts['itemcat'], FILTER_VALIDATE_INT );
-	
-	// allow setting itemcat by url 
-	$itemcat = get_query_var( 'itemcat', $atts['itemcat'] );	
-	
-	$atts['include_filter'] = filter_var( $atts['include_filter'], FILTER_VALIDATE_BOOLEAN );
-	if ($atts['include_filter']) {
-		
-	}
-	
-	$itemList = filterNavBar( 'cb_items_category', $itemcat );
-
 	$atts['hidedefault'] = filter_var( $atts['hidedefault'], FILTER_VALIDATE_BOOLEAN );
 	$atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
+	
+	$itemcat = cb_catalogue_get_current_term( $atts['itemcat'] ); // allow setting itemcat by url 
 
-  // $itemList = get_cb_items_by_category($itemcat, FALSE);
-
-  if ($atts['locationcat'] != '') {
-    $itemList = filterPostsByLocation($itemList,$atts['locationcat']);
-  }
-  $itemAvailabilities = itemListAvailabilities($itemList);
-  
-  if ($atts['sortbyavailability']){
-    $itemList = sortItemsByAvailability($itemList,$itemAvailabilities);
-  }
-
-	if ($itemList){
-		return create_postgrid_from_posts($itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class']);
+	cb_catalogue_render_filternav( $itemcat );
+	
+	// filter the item list 
+	$itemList = cb_catalogue_get_items( $itemcat );
+  	$itemAvailabilities = itemListAvailabilities($itemList);
+  	if ($atts['sortbyavailability']){
+    	$itemList = sortItemsByAvailability($itemList,$itemAvailabilities);
+  	}
+	
+	if ($itemList){	
+		cb_catalogue_render_masonry_grid( $itemList,$itemAvailabilities,$atts['hidedefault'],$atts['class'] );
 	}
 	else {
 		return '<div class="cb-notice cb-error">' . __('No posts found', 'cb_cards') . '</div>';
@@ -55,13 +44,46 @@ function shortcode_cb_catalogue($atts){
 add_shortcode( 'cb_catalogue', 'shortcode_cb_catalogue' );
 
 
-function filterNavBar( $taxonomy = 'cb_items_category', $current_term = '' ) {
+
+function cb_catalogue_get_current_term( $default ) {
+	return get_query_var( 'itemcat', $default ); // allow setting itemcat by url 
+}
+
+ function cb_catalogue_render_masonry_grid( $itemList,$itemAvailabilities,$hidedefault,$class ) {
+	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/masonryGrid.php');
+	echo create_postgrid_from_posts($itemList,$itemAvailabilities,$hidedefault,$class);
+ } 
+ 
+ function cb_catalogue_render_grid( $itemList,$itemAvailabilities,$hidedefault,$class ) {
+	require_once(CB_CATALOGUE_PLUGIN_PATH . '/inc/View/standardGrid.php');
+	echo create_grid_from_posts($itemList,$itemAvailabilities,$hidedefault,$class);
+ }
+ 
+
+function cb_catalogue_get_items( $current_term = '' ) {
 	
-	$include_empty = TRUE;
+	$args = array(
+		'orderby'			=> 'title',
+		'order'				=> 'ASC',
+		'category_slug' => $current_term,
+	);
+	$term_items_filtered = \CommonsBooking\Repository\Item::get($args, FALSE);
+	
+	return $term_items_filtered;
+}
+
+
+function cb_catalogue_render_filternav( $current_term = '') {
+	
+	$include_empty = TRUE; 			// include empty categories 
+	$include_filter_all = TRUE; 			// include "all" (unfiltered)
 	$hide_unavailable_items = FALSE;
-	$hide_empty_cats = TRUE;
+	$taxonomy = 'cb_items_category';
 	$css_class = '';
-	$current_term_items = array();
+		
+	$current_term_items = array(); 	// only items matching current term
+	$nav_list_items		= array();	// navigation items
+	
 	
 	// Get the taxonomy's terms
 	$nav_terms = get_terms(
@@ -70,46 +92,45 @@ function filterNavBar( $taxonomy = 'cb_items_category', $current_term = '' ) {
 		)
 	);
 	
-	// add a dummy entry for "all/no-filter"
-	$nav_no_filter = array(
-		'name' => __('All', 'cb_cards'),
-		'slug' => '' 
-		);
+	if ($include_filter_all) {	
+		// add a dummy entry for "all/no-filter"
+		$nav_no_filter = array(
+			'name' => __('All', 'cb_catalogue'),
+			'slug' => '' 
+			);
+			
+		$nav_obj = (object) $nav_no_filter;
+		array_unshift($nav_terms,  $nav_obj); // insert "all" entry as first		
+	}
 		
-	$nav_obj = (object) $nav_no_filter;
-	array_unshift($nav_terms,  $nav_obj);
-		
-	if ( ! empty( $nav_terms ) && is_array( $nav_terms ) ) { 
-		$term_items = array();
-		?>
-
+	if ( ! empty( $nav_terms ) && is_array( $nav_terms ) ) { ?>
 		<div class="cb-wrapper">
 			<ul class="<?php echo $css_class; ?> filterbar">
-		<?php foreach ( $nav_terms as $term ) {			
-			$args = array(
-				'orderby'			=> 'title',
-				'order'				=> 'ASC',
-				'category_slug' => $term->slug,
-			);
-			$term_items = \CommonsBooking\Repository\Item::get($args, $hide_unavailable_items);
-			$count = count($term_items);
-
-			$is_current = '';
-			
-			if ( $term->slug == $current_term ) {
-				$current_term_items = $term_items;
-				$is_current = 'current-term';
-			}
-			
-		    ?>
-				<li class="term-<?php echo $term->slug; ?> <?php echo $is_current; ?>"><a href="<?php echo esc_url( add_query_arg( 'itemcat', $term->slug ) ) ?>" >
-					<?php echo $term->name; ?>
-				</a>(<?php echo $count; ?>)</li><?php
-			} ?>
-		</ul>
+				<?php foreach ( $nav_terms as $term ) {			
+					$args = array(
+						'orderby'			=> 'title',
+						'order'				=> 'ASC',
+						'category_slug' => $term->slug,
+					);
+					$term_items = \CommonsBooking\Repository\Item::get($args, $hide_unavailable_items);
+					$count = count($term_items);
+		
+					$is_current = '';
+					
+					if ( $term->slug == $current_term ) {
+						$is_current = 'current-term';
+					}
+					?>
+						<li class="term-<?php echo $term->slug; ?> <?php echo $is_current; ?>"><a href="<?php echo esc_url( add_query_arg( 'itemcat', $term->slug ) ) ?>" >
+							<?php echo $term->name; ?>
+						</a>(<?php echo $count; ?>)</li><?php
+				} ?>
+			</ul>
 		</div>
-	<?php 
-	return $current_term_items;
+	<?php
 	} // end if  ! empty( $terms ) && is_array( $terms )
 }
+
+
+
 ?>

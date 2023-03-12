@@ -3,8 +3,6 @@
 function enqueue_postgrid_styles(){
 	wp_register_style('postgrid-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/postgrid.css', __FILE__);
 	wp_enqueue_style('postgrid-css');	
-	wp_register_style('filterbar-css', CB_CATALOGUE_PLUGIN_URI . '/inc/View/css/filterbar.css', __FILE__);
-	wp_enqueue_style('filterbar-css');	
 	wp_enqueue_script('postgrid-js', CB_CATALOGUE_PLUGIN_URI . '/inc/View/js/postGrid.js', array('jquery','imagesloaded','masonry'));
 }
 
