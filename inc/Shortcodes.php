@@ -5,23 +5,22 @@
 *
 */
 
-function shortcode_cb_catalogue($atts){
+function shortcode_cb_catalogue_items($atts){
 	
 	$atts = shortcode_atts( array(
 		'itemcat' => '',
 		'class' => '',
 		'hidedefault' => TRUE,
-		'layout' => 'masonry',
-    	'sortbyavailability' => TRUE
+    	'sortbyavailability' => TRUE,
+		'layout' => 'masonry'
 	),$atts);
 	
+
 	$atts['itemcat'] = filter_var( $atts['itemcat'], FILTER_VALIDATE_INT );
 	$atts['hidedefault'] = filter_var( $atts['hidedefault'], FILTER_VALIDATE_BOOLEAN );
 	$atts['sortbyavailability'] = filter_var( $atts['sortbyavailability'], FILTER_VALIDATE_BOOLEAN);
 	
 	$itemcat = cb_catalogue_get_current_term( $atts['itemcat'] ); // allow setting itemcat by url 
-
-	cb_catalogue_render_filternav( $itemcat );
 	
 	// filter the item list 
 	$itemList = cb_catalogue_get_items( $itemcat );
@@ -38,11 +37,31 @@ function shortcode_cb_catalogue($atts){
 	}
 }
 
-add_shortcode( 'cb_catalogue', 'shortcode_cb_catalogue' );
+add_shortcode( 'cb_catalogue_items', 'shortcode_cb_catalogue_items' );
 
 
+function shortcode_cb_catalogue_filter($atts){
+	
+	$args = shortcode_atts( array(
+		'orderby'			=> 'title',
+		'order'				=> 'ASC',
+		'include_empty' => TRUE,
+		'include_filter_all' => TRUE,
+		'include_unavailable_items' => TRUE,
+		'taxonomy' => 'cb_items_category',
+		'css_class'	=> '',
+	),$atts);
+	
+	
+	$itemcat = cb_catalogue_get_current_term(''); // allow setting itemcat by url 
+	
+	cb_catalogue_render_filternav( $args, $itemcat );
+}
 
-function cb_catalogue_get_current_term( $default ) {
+add_shortcode( 'cb_catalogue_filter', 'shortcode_cb_catalogue_filter' );
+
+
+function cb_catalogue_get_current_term( $default='' ) {
 	return get_query_var( 'itemcat', $default ); // allow setting itemcat by url 
 }
 
@@ -70,13 +89,16 @@ function cb_catalogue_get_items( $current_term = '' ) {
 }
 
 
-function cb_catalogue_render_filternav( $current_term = '') {
+function cb_catalogue_render_filternav( $args, $current_term = '') {
 	
-	$include_empty = TRUE; 			// include empty categories 
-	$include_filter_all = TRUE; 			// include "all" (unfiltered)
-	$hide_unavailable_items = FALSE;
-	$taxonomy = 'cb_items_category';
-	$css_class = '';
+	$include_empty = filter_var( $args['$include_empty'], FILTER_VALIDATE_BOOLEAN );
+	$include_filter_all = filter_var( $args['include_filter_all'], FILTER_VALIDATE_BOOLEAN ); // include "all" (unfiltered)
+	$include_unavailable_items = filter_var( $args['include_unavailable_items'], FILTER_VALIDATE_BOOLEAN );
+	$hide_unavailable_items = !$include_unavailable_items; // CB::get() expects "hide"
+	$taxonomy = $args['taxonomy'];
+	$css_class = $args['css_class'];
+	$orderby = $args['orderby'];
+	$order = $args['order'];
 		
 	$current_term_items = array(); 	// only items matching current term
 	$nav_list_items		= array();	// navigation items
@@ -86,6 +108,8 @@ function cb_catalogue_render_filternav( $current_term = '') {
 	$nav_terms = get_terms(
 		array(
 			'taxonomy'   => $taxonomy,
+			'orderby'	 => $orderby,
+			'order'		 => $order,
 		)
 	);
 	
