@@ -8,11 +8,11 @@
 function shortcode_cb_catalogue_items($atts){
 	
 	$atts = shortcode_atts( array(
-		'itemcat' => '',
-		'class' => '',
-		'hidedefault' => TRUE,
+		'itemcat' 		=> '',	// set cat slug to show only one cat
+		'class' 		=> '',
+		'hidedefault' 	=> TRUE,
     	'sortbyavailability' => TRUE,
-		'layout' => 'basic'
+		'layout' => 'basic' // or "masonry"
 	),$atts);
 	
 	$atts['itemcat'] = filter_var( $atts['itemcat'], FILTER_VALIDATE_INT );
@@ -47,15 +47,15 @@ add_shortcode( 'cb_catalogue_items', 'shortcode_cb_catalogue_items' );
 function shortcode_cb_catalogue_filter($atts){
 	
 	$args = shortcode_atts( array(
-		'orderby'			=> 'title',
-		'order'				=> 'ASC',
-		'include_empty' => TRUE,
-		'include_filter_all' => FALSE,
+		'orderby'					=> 'title',
+		'order'						=> 'ASC',
+		'include_empty' 			=> TRUE,
+		'include_filter_all' 		=> FALSE,
 		'include_unavailable_items' => TRUE,
-		'taxonomy' => 'cb_items_category',
-		'css_class'	=> '',
-		'catalogue_page_id' => '',
-		'layout' => 'filter' // or "grid"
+		'taxonomy' 					=> 'cb_items_category',
+		'css_class'					=> '',
+		'catalogue_page_id' 		=> '', // redirect to this page
+		'layout' 					=> 'filter' // or "grid"
 	),$atts);
 	
 	$itemcat = cb_catalogue_get_current_term(''); // allow setting itemcat by url 
