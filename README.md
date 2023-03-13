@@ -4,6 +4,7 @@ Catalogue-like Navigation for CommonsBooking items.
 Started from on https://github.com/hansmorb/freielasten_wptheme 
 
 
+
 ## Quick Start
 
 Insert the shortcodes [cb_catalogue_filter] and [cb_catalogue_items] into a page.
@@ -13,7 +14,7 @@ Insert the shortcodes [cb_catalogue_filter] and [cb_catalogue_items] into a page
 
 Grid of all items, args: 
 
-''''
+````
    $atts = shortcode_atts( array(
    'itemcat' 		=> '',	// set cat slug to show only one cat
    'class' 		=> '',
@@ -21,16 +22,22 @@ Grid of all items, args:
     'sortbyavailability' => TRUE,
    'layout' => 'basic' // or "masonry"
 ),$atts);
-''''
-
+````
+Masonry Layout
+![layout-masonry](https://user-images.githubusercontent.com/4009931/224728331-8b43e201-d77a-49a7-99cd-93027803b762.jpg)
+Basic Layout
+![layout-basic](https://user-images.githubusercontent.com/4009931/224728337-df15f7a2-01a3-4503-a35d-2bd6030d3b01.jpg)
 
 
 
 ### [cb_catalogue_filter] 
 
+Filter bar, layout "filter" or "grid"
+![filterbar](https://user-images.githubusercontent.com/4009931/224728245-b82a46d6-f1f1-4d5a-a790-e1102567cdc3.jpg)
+
 Filter bar with the categories, args:
 
-''''
+````
    $args = shortcode_atts( array(
    'orderby'					=> 'title',
    'order'						=> 'ASC',
@@ -42,4 +49,4 @@ Filter bar with the categories, args:
    'catalogue_page_id' 		=> '', // redirect to this page
    'layout' 					=> 'filter' // or "grid"
 ),$atts);
-''''
+````
