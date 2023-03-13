@@ -126,7 +126,8 @@ function itemGetCalendarData($cb_item,$days=7){
 		$cb_item = get_post($cb_item);
 	}
 	$cb_item_id = $cb_item->ID;
-	$locationId = reset(\CommonsBooking\Repository\Location::getByItem( $cb_item_id, true ))->ID; //@TODO: This is producing a notice when no location set. 
+	$locationId = 0;
+	// $locationId = reset(\CommonsBooking\Repository\Location::getByItem( $cb_item_id, true ))->ID; //@TODO: This is producing a notice when no location set. 
 	$date  = new DateTime();
 	$today = $date->format( "Y-m-d" );
 	$days_display = array_fill( 0, $days, 'n' );

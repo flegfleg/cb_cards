@@ -4,6 +4,11 @@
 	list-style: none;
 }
 
+.cb-wrapper ul.filterbar span.count{
+	opacity: 0.4;
+}
+
+/* filter bar layout  */
 .cb-wrapper ul.filterbar li {
 	margin: 0 20px 0 0;
 	padding: 0;
@@ -19,6 +24,45 @@
 .cb-wrapper ul.filterbar li.current-term a{
 	font-weight: bolder;
 }
+
+/* category grid layout */
+
+.cb-wrapper ul.filterbar.layout-grid {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.cb-wrapper ul.filterbar.layout-grid li {
+	background: #FFF;
+	border-radius: var(--commonsbooking-radius);
+
+	padding: .3em;
+	margin: .2em;
+}
+
+.cb-wrapper ul.filterbar.layout-grid li a {
+	
+}
+
+@media screen and (min-width: 40.063em) {
+	
+  .cb-wrapper ul.filterbar.layout-grid li {
+	flex: 1 1 auto; 
+	width: auto;
+	text-align: center;
+	padding: .5em;
+	margin: .5em;
+	background: #FFF;
+	border-radius: var(--commonsbooking-radius);
+  }  
+  .cb-wrapper ul.filterbar.layout-grid li a{
+	font-size: 1.5em;
+	display: block;
+  }
+}
+
+
+
 
 ul.card__meta, ul.card__meta li {
 	margin: 0;
