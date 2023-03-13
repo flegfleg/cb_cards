@@ -1,6 +1,6 @@
 <?php
 /**
- * CB Cards
+ * CB Catalogue
  *
  * @package       CB Catalogue
  * @author        Florian Egermann
@@ -19,7 +19,7 @@
  * License URI:   https://www.gnu.org/licenses/gpl-2.0.html
  *
  * You should have received a copy of the GNU General Public License
- * along with CB Cards. If not, see <https://www.gnu.org/licenses/gpl-2.0.html/>.
+ * along with CB Catalogue. If not, see <https://www.gnu.org/licenses/gpl-2.0.html/>.
  */
 
 // Exit if accessed directly.
