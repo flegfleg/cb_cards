@@ -3,7 +3,7 @@
 Catalogue-like Navigation for CommonsBooking items. 
 Started from on https://github.com/hansmorb/freielasten_wptheme 
 
-
+**NOTE: The just-released CommonsBooking version (2.9) brings a new frontend that has a better implementation of a gallery view. This repo will not be updated.**  
 
 ## Quick Start
 
